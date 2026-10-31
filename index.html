@@ -3,7 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Luiz Ramos</title>
+  <title>Luiz Ramos | Systems, Code & Sound</title>
+  <meta name="description" content="Personal space of Luiz Ramos. Systems architecture, AI automation, and interactive multitrack audio experiment.">
+  <meta name="author" content="Luiz Ramos">
+  <meta name="theme-color" content="#000000">
+  <link rel="canonical" href="https://lramosmc.github.io">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://lramosmc.github.io">
+  <meta property="og:title" content="Luiz Ramos | Systems, Code & Sound">
+  <meta property="og:description" content="Every complex system is a composition. An interactive multitrack audio and narrative experience.">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Meta -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Luiz Ramos | Systems, Code & Sound">
+  <meta name="twitter:description" content="Every complex system is a composition. An interactive multitrack audio and narrative experience.">
+
+  <!-- Favicon: Sine Wave Amber Glyph -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23080808'/><path d='M6 16 C10 8, 12 8, 16 16 C20 24, 22 24, 26 16' fill='none' stroke='%23f59e0b' stroke-width='2.5' stroke-linecap='round'/></svg>">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -465,6 +485,10 @@
     function setLanguage(lang) {
       currentLang = lang;
       const t = translations[lang];
+      document.documentElement.lang = lang;
+      if (lang === 'pt') document.title = "Luiz Ramos | Sistemas, Código & Som";
+      else if (lang === 'es') document.title = "Luiz Ramos | Sistemas, Código y Sonido";
+      else document.title = "Luiz Ramos | Systems, Code & Sound";
 
       document.querySelector('#layer-idle p').innerText = t.idle;
       document.getElementById('p-0').innerText = t.text0;
