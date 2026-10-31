@@ -1,0 +1,6 @@
+# Experiments and scratch files
+experiments/
+*.png
+HANDOFF.md
+.DS_Store
+Thumbs.db

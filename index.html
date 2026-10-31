@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black text-neutral-400">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luiz Ramos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --fg-primary: #f5f5f5;
+      --fg-muted: #888888;
+      --border-subtle: #171717;
+    }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--fg-muted);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      user-select: none;
+      letter-spacing: 0.01em;
+      word-spacing: 0.05em;
+    }
+
+    ::selection {
+      background: #262626;
+      color: #ffffff;
+    }
+
+    /* Dissolução Cinematográfica: suave, lenta, com blur inicial */
+    .story-layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      filter: blur(4px);
+      pointer-events: none;
+      transform: scale(0.985);
+      transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                  filter 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .story-layer.active {
+      opacity: 1;
+      filter: blur(0px);
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* Elementos secundários do passo 4 com transição gradual própria */
+    .gradual-fade {
+      opacity: 0;
+      filter: blur(3px);
+      transform: translateY(4px);
+      transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  filter 1.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .gradual-fade.revealed {
+      opacity: 1;
+      filter: blur(0px);
+      transform: translateY(0);
+    }
+
+    /* Botão de passo Flash-like */
+    .action-slot {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .action-slot.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .flash-step-btn {
+      width: 100%;
+      height: 100%;
+      padding: 0 1.25rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      background: linear-gradient(180deg, #131313 0%, #080808 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #e5e5e5;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .flash-step-btn:hover {
+      border-color: rgba(245, 158, 11, 0.65);
+      background: linear-gradient(180deg, #1c1c1c 0%, #0d0d0d 100%);
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .flash-step-btn:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    /* Mini Botões do Mixer */
+    .mini-stem-btn {
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mini-stem-btn.active {
+      color: #ffffff;
+      border-color: #404040;
+      background: #111111;
+    }
+    .mini-stem-btn:not(.active) {
+      color: #525252;
+      border-color: #171717;
+      background: #050505;
+    }
+
+    /* Slider minimalista */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #1f1f1f;
+      height: 2px;
+      border-radius: 1px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d4d4d4;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      background: #ffffff;
+      transform: scale(1.3);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d4d4d4;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* ========================================================
+       FUNDO FIXO: ACOUSTIC SAND / PARTÍCULAS DE RESSONÂNCIA
+       ======================================================== */
+    #bg-layer-sand {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 1;
+      display: block;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between py-10 px-6 sm:px-12 selection:bg-neutral-800 relative">
+
+  <!-- CAMADA FIXA: ACOUSTIC SAND -->
+  <canvas id="bg-layer-sand"></canvas>
+
+  <!-- CONTEÚDO PRINCIPAL (Z-INDEX 10) -->
+  <div class="relative z-10 w-full flex flex-col justify-between min-h-[calc(100vh-5rem)]">
+
+    <!-- TOP BAR: FIXA, LIMPA & ARQUITETADA -->
+    <header class="max-w-xl w-full mx-auto flex items-center justify-between pt-2">
+      <div class="flex items-center gap-3.5">
+        <span class="text-sm font-medium tracking-tight text-neutral-200">Luiz Ramos</span>
+        <div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-neutral-900/90 border border-neutral-800/90 text-[10px] font-mono text-neutral-300 shadow-sm tracking-wider uppercase">
+          <span class="flex items-end gap-[2px] h-2.5">
+            <span class="w-[2px] h-1.5 bg-amber-400 animate-pulse"></span>
+            <span class="w-[2px] h-2.5 bg-amber-400 animate-pulse delay-75"></span>
+            <span class="w-[2px] h-2 bg-amber-400 animate-pulse delay-150"></span>
+          </span>
+          <span>sound on</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2 text-[11px] font-mono">
+        <button class="lang-btn text-neutral-100 font-semibold transition-colors duration-300" data-lang="en">en</button>
+        <span class="text-neutral-800">/</span>
+        <button class="lang-btn text-neutral-600 hover:text-neutral-300 transition-colors duration-300" data-lang="pt">pt</button>
+        <span class="text-neutral-800">/</span>
+        <button class="lang-btn text-neutral-600 hover:text-neutral-300 transition-colors duration-300" data-lang="es">es</button>
+      </div>
+    </header>
+
+    <!-- PALCO PRINCIPAL (STAGE FIXO): NENHUM ELEMENTO EMPURRA OUTRO -->
+    <main class="max-w-xl w-full mx-auto my-auto py-6 space-y-7">
+
+      <!-- OSCILOSCÓPIO: COMPOSIÇÃO DE SENOIDES + TRANSIÇÃO PRECISA 1:06 -> 2:35 -->
+      <div class="relative w-full py-2 border-y border-neutral-900/90 overflow-hidden">
+        <canvas id="scopeCanvas" class="w-full h-[105px] block"></canvas>
+        
+        <!-- Marcador etéreo durante o Windmill Interlude -->
+        <div id="interludeBadge" class="absolute top-2.5 right-3 px-2 py-0.5 rounded bg-black/70 border border-purple-500/20 text-[9px] font-mono text-purple-300/80 tracking-widest uppercase opacity-0 transition-opacity duration-700 pointer-events-none">
+          ✧ windmill interlude
+        </div>
+      </div>
+
+      <!-- STAGE DE NARRATIVA COM ALTURA TOTALMENTE RESERVADA (Zero salto de layout) -->
+      <div class="relative w-full min-h-[195px]">
+        
+        <!-- Slide Idle: Antes do primeiro clique -->
+        <div id="layer-idle" class="story-layer active text-center">
+          <p class="text-xs text-neutral-500 font-mono tracking-wide">
+            Every complex system is a composition. Click to listen and explore.
+          </p>
+        </div>
+
+        <!-- Slide 1: 1998 & Computadores -->
+        <div id="layer-0" class="story-layer">
+          <p class="text-[17px] sm:text-[18px] text-neutral-100 font-normal leading-[1.7] tracking-normal" id="p-0">
+            Everything started in 1998 with my first CRT computer. Tearing open hardware, figuring out how systems communicate, and building from scratch became my baseline way of seeing the world.
+          </p>
+        </div>
+
+        <!-- Slide 2: IA & Automação -->
+        <div id="layer-1" class="story-layer">
+          <p class="text-[17px] sm:text-[18px] text-neutral-100 font-normal leading-[1.7] tracking-normal" id="p-1">
+            Taking computers apart in my childhood taught me never to fear complexity. Today, I use automation and artificial intelligence for what truly matters: stripping away bureaucracy and making technology work for us.
+          </p>
+        </div>
+
+        <!-- Slide 3: Silêncio, Filosofia & Música -->
+        <div id="layer-2" class="story-layer">
+          <p class="text-[17px] sm:text-[18px] text-neutral-100 font-normal leading-[1.7] tracking-normal" id="p-2">
+            Philosophy teaches me to question assumptions before designing solutions, and music reminds me every day that technical precision only matters when all the parts operate in harmony.
+          </p>
+        </div>
+
+        <!-- Slide 4: Carreira, Composição & Conexões -->
+        <div id="layer-3" class="story-layer justify-between space-y-4">
+          
+          <!-- Frase Principal -->
+          <p class="text-[16px] sm:text-[17px] text-neutral-100 font-normal leading-[1.7] tracking-normal" id="p-3-main">
+            In my corporate life, I serve as a Customer Success Manager for Global B2B tech accounts. On the other half of life, music ties it all together: over 20 years on strings, drums, and composition.
+          </p>
+
+          <!-- Raízes acadêmicas: Surge em dissolução calma após 3.2s -->
+          <div id="fade-curiosity" class="gradual-fade py-2.5 px-3.5 rounded border border-neutral-900 bg-neutral-950/60 space-y-1">
+            <div class="flex items-center gap-1.5 leading-none">
+              <span class="text-[9px] font-mono text-neutral-500 uppercase tracking-widest leading-none inline-flex items-center" id="curiosity-badge">// ROOTS & COMPOSITION</span>
+            </div>
+            <p class="text-[13px] text-neutral-300 font-normal leading-[1.6]" id="p-3-secret">
+              I studied Music Composition and Conducting at the School of Music and Fine Arts, alongside my wife and partner. Music is a core pillar linked to our everyday lives.
+            </p>
+          </div>
+
+          <!-- Links: Surgem em dissolução suave após 6.0s -->
+          <div id="fade-links" class="gradual-fade flex flex-row items-center justify-between text-xs font-mono pt-1">
+            <span class="text-neutral-500 text-[11px]" id="invite-label">Connect & explore further:</span>
+            <div class="flex items-center gap-5">
+              <a href="https://linkedin.com/in/luiz-ramos7" target="_blank" class="text-neutral-300 hover:text-white transition-colors duration-300 underline underline-offset-4 decoration-neutral-800 hover:decoration-neutral-400">LinkedIn ↗</a>
+              <a href="https://github.com/lramosmc" target="_blank" class="text-neutral-300 hover:text-white transition-colors duration-300 underline underline-offset-4 decoration-neutral-800 hover:decoration-neutral-400">GitHub ↗</a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ÁREA DE CONTROLES COM ALTURA RESERVADA FIXA (Zero empurrões no layout) -->
+      <div class="relative w-full h-14">
+        
+        <!-- Slot 0: Botão Vocals -->
+        <div id="slot-0" class="action-slot active">
+          <button class="flash-step-btn group" id="btnStep-0">
+            <span class="flex items-center gap-3">
+              <span class="text-neutral-500 text-[10px] font-mono">01</span>
+              <span class="font-medium text-neutral-100 tracking-tight">Vocals</span>
+            </span>
+            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-medium tracking-wide shadow-[0_0_12px_rgba(245,158,11,0.15)] group-hover:border-amber-400 group-hover:bg-amber-500/20 transition-all duration-300">
+              <span class="relative flex h-1.5 w-1.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+              </span>
+              <span id="btn-text-0">roots & hardware →</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Slot 1: Botão Guitar -->
+        <div id="slot-1" class="action-slot">
+          <button class="flash-step-btn group" id="btnStep-1">
+            <span class="flex items-center gap-3">
+              <span class="text-neutral-500 text-[10px] font-mono">02</span>
+              <span class="font-medium text-neutral-100 tracking-tight">Guitar</span>
+            </span>
+            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-medium tracking-wide shadow-[0_0_12px_rgba(245,158,11,0.15)] group-hover:border-amber-400 group-hover:bg-amber-500/20 transition-all duration-300">
+              <span class="relative flex h-1.5 w-1.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+              </span>
+              <span id="btn-text-1">systems & AI →</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Slot 2: Botão Rhythm -->
+        <div id="slot-2" class="action-slot">
+          <button class="flash-step-btn group" id="btnStep-2">
+            <span class="flex items-center gap-3">
+              <span class="text-neutral-500 text-[10px] font-mono">03</span>
+              <span class="font-medium text-neutral-100 tracking-tight">Rhythm</span>
+            </span>
+            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-medium tracking-wide shadow-[0_0_12px_rgba(245,158,11,0.15)] group-hover:border-amber-400 group-hover:bg-amber-500/20 transition-all duration-300">
+              <span class="relative flex h-1.5 w-1.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+              </span>
+              <span id="btn-text-2">philosophy + music →</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Slot 3: Botão Drums -->
+        <div id="slot-3" class="action-slot">
+          <button class="flash-step-btn group" id="btnStep-3">
+            <span class="flex items-center gap-3">
+              <span class="text-neutral-500 text-[10px] font-mono">04</span>
+              <span class="font-medium text-neutral-100 tracking-tight">Drums</span>
+            </span>
+            <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-medium tracking-wide shadow-[0_0_12px_rgba(245,158,11,0.15)] group-hover:border-amber-400 group-hover:bg-amber-500/20 transition-all duration-300">
+              <span class="relative flex h-1.5 w-1.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+              </span>
+              <span id="btn-text-3">work →</span>
+            </span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- PAINEL FINAL DO MIXER & MASTER VOLUME (Esmaece suavemente aos 8.5s) -->
+      <div id="finalMixerStage" class="gradual-fade space-y-3 pt-1">
+        <div class="text-[10px] font-mono text-neutral-600 flex justify-between">
+          <span id="mixer-info">full track // click to mute or isolate channels</span>
+          <span>138.5 BPM</span>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2">
+          <button id="miniBtn-0" class="mini-stem-btn active p-2.5 rounded-lg border text-center font-mono text-xs" data-idx="0">
+            <span class="text-[9px] text-neutral-600 block">01</span>
+            <span>Vocals</span>
+          </button>
+          <button id="miniBtn-1" class="mini-stem-btn active p-2.5 rounded-lg border text-center font-mono text-xs" data-idx="1">
+            <span class="text-[9px] text-neutral-600 block">02</span>
+            <span>Guitar</span>
+          </button>
+          <button id="miniBtn-2" class="mini-stem-btn active p-2.5 rounded-lg border text-center font-mono text-xs" data-idx="2">
+            <span class="text-[9px] text-neutral-600 block">03</span>
+            <span>Rhythm</span>
+          </button>
+          <button id="miniBtn-3" class="mini-stem-btn active p-2.5 rounded-lg border text-center font-mono text-xs" data-idx="3">
+            <span class="text-[9px] text-neutral-600 block">04</span>
+            <span>Drums</span>
+          </button>
+        </div>
+
+        <!-- Master Volume Slider -->
+        <div class="pt-2 px-1 flex items-center justify-between gap-4 font-mono text-xs text-neutral-500">
+          <span class="text-[10px] uppercase tracking-wider text-neutral-600" id="volume-label">master volume</span>
+          <div class="flex items-center gap-3 flex-1 max-w-[200px]">
+            <input id="masterVolumeSlider" type="range" min="0" max="100" value="50" class="w-full cursor-pointer">
+            <span id="volumeValueDisplay" class="text-[11px] text-neutral-400 w-8 text-right font-mono">50%</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- FOOTER CONTATO DIRETO -->
+    <footer class="max-w-xl w-full mx-auto flex items-baseline justify-between text-xs font-mono text-neutral-600 pb-2 border-t border-neutral-900/60 pt-4">
+      <div class="flex gap-4">
+        <a href="mailto:luizc.ramosjunior@gmail.com" class="hover:text-neutral-300 transition-colors duration-300">email</a>
+        <a href="https://linkedin.com/in/luiz-ramos7" target="_blank" class="hover:text-neutral-300 transition-colors duration-300">linkedin ↗</a>
+        <a href="https://github.com/lramosmc" target="_blank" class="hover:text-neutral-300 transition-colors duration-300">github ↗</a>
+      </div>
+      <span>Curitiba, Brazil</span>
+    </footer>
+
+  </div>
+
+  <!-- SCRIPT ENGINE COM ACOUSTIC SAND FIXO + ENGINE DE ÁUDIO -->
+  <script>
+    // Dicionário i18n
+    const translations = {
+      en: {
+        idle: "Every complex system is a composition. Click to listen and explore.",
+        text0: "Everything started in 1998 with my first CRT computer. Tearing open hardware, figuring out how systems communicate, and building from scratch became my baseline way of seeing the world.",
+        text1: "Taking computers apart in my childhood taught me never to fear complexity. Today, I use automation and artificial intelligence for what truly matters: stripping away bureaucracy and making technology work for us.",
+        text2: "Philosophy teaches me to question assumptions before designing solutions, and music reminds me every day that technical precision only matters when all the parts operate in harmony.",
+        text3_main: "In my corporate life, I serve as a Customer Success Manager for Global B2B tech accounts. On the other half of life, music ties it all together: over 20 years on strings, drums, and composition.",
+        curiosityBadge: "// ROOTS & COMPOSITION",
+        text3_secret: "I studied Music Composition and Conducting at the School of Music and Fine Arts, alongside my wife and partner. Music is a core pillar linked to our everyday lives.",
+        invite: "Connect & explore further:",
+        btn0: "roots & hardware →",
+        btn1: "systems & AI →",
+        btn2: "philosophy + music →",
+        btn3: "work →",
+        mixerInfo: "full track // click to mute or isolate channels",
+        volumeLabel: "master volume"
+      },
+      pt: {
+        idle: "Todo sistema complexo é uma composição. Clique para ouvir e explorar.",
+        text0: "Tudo começou em 1998 com meu primeiro computador de tubo. Abrir gabinetes, entender como os sistemas se comunicam e construir do zero virou meu modo padrão de enxergar o mundo.",
+        text1: "Desmontar computadores na infância me ensinou a não ter medo da complexidade. Hoje, uso automação e inteligência artificial para o que realmente importa: tirar a burocracia do caminho e fazer a tecnologia trabalhar a nosso favor.",
+        text2: "A filosofia me ensina a questionar premissas antes de desenhar soluções, e a música me lembra todo dia que precisão técnica só faz sentido quando as partes operam em harmonia.",
+        text3_main: "No dia a dia corporativo, atuo como Customer Success Manager para Contas Globais de tecnologia B2B. Na outra metade da vida, a música amarra tudo: mais de 20 anos entre cordas, bateria e composição.",
+        curiosityBadge: "// RAÍZES & COMPOSIÇÃO",
+        text3_secret: "Cursei Composição e Regência na Escola de Música e Belas Artes, ao lado da minha esposa e parceira. A música é um pilar estruturante ligado ao nosso cotidiano.",
+        invite: "Te convido a conhecer mais:",
+        btn0: "raízes & hardware →",
+        btn1: "sistemas & IA →",
+        btn2: "filosofia + música →",
+        btn3: "trabalho →",
+        mixerInfo: "faixa completa // clique para silenciar ou isolar canais",
+        volumeLabel: "volume master"
+      },
+      es: {
+        idle: "Cada sistema complejo es una composición. Haz clic para escuchar y explorar.",
+        text0: "Todo comenzó en 1998 con mi primera computadora con monitor CRT. Abrir gabinetes, entender cómo se comunican los sistemas y construir desde cero se convirtió en mi forma de ver el mundo.",
+        text1: "Desmontar computadoras en mi infancia me enseñó a no temerle a la complejidad. Hoy, uso la automatización y la inteligencia artificial para lo que realmente importa: quitar la burocracia del camino y hacer que la tecnología trabaje a nuestro favor.",
+        text2: "La filosofía me enseña a cuestionar premisas antes de diseñar soluciones, y la música me recuerda todos los días que la precisión técnica solo tiene sentido cuando las partes operan en armonía.",
+        text3_main: "En mi vida corporativa, me desempeño como Customer Success Manager para Cuentas Globales de tecnología B2B. En la otra mitad de la vida, la música lo une todo: más de 20 años en cuerdas, batería y composición.",
+        curiosityBadge: "// RAÍCES Y COMPOSICIÓN",
+        text3_secret: "Estudié Composición y Dirección en la Escuela de Música y Bellas Artes, junto a mi esposa y compañera. La música es un pilar fundamental ligado a nuestra vida diaria.",
+        invite: "Te invito a conectar:",
+        btn0: "raíces y hardware →",
+        btn1: "sistemas e IA →",
+        btn2: "filosofía + música →",
+        btn3: "trabajo →",
+        mixerInfo: "pista completa // clic para silenciar o aislar canales",
+        volumeLabel: "volumen master"
+      }
+    };
+
+    let currentLang = 'en';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+
+      document.querySelector('#layer-idle p').innerText = t.idle;
+      document.getElementById('p-0').innerText = t.text0;
+      document.getElementById('p-1').innerText = t.text1;
+      document.getElementById('p-2').innerText = t.text2;
+      document.getElementById('p-3-main').innerText = t.text3_main;
+      document.getElementById('curiosity-badge').innerText = t.curiosityBadge;
+      document.getElementById('p-3-secret').innerText = t.text3_secret;
+
+      document.getElementById('invite-label').innerText = t.invite;
+      document.getElementById('btn-text-0').innerText = t.btn0;
+      document.getElementById('btn-text-1').innerText = t.btn1;
+      document.getElementById('btn-text-2').innerText = t.btn2;
+      document.getElementById('btn-text-3').innerText = t.btn3;
+
+      document.getElementById('mixer-info').innerText = t.mixerInfo;
+      document.getElementById('volume-label').innerText = t.volumeLabel;
+
+      document.querySelectorAll('.lang-btn').forEach(b => {
+        if (b.dataset.lang === lang) {
+          b.className = 'lang-btn text-neutral-100 font-semibold transition-colors duration-300';
+        } else {
+          b.className = 'lang-btn text-neutral-600 hover:text-neutral-300 transition-colors duration-300';
+        }
+      });
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+    });
+
+    // ========================================================
+    // ACOUSTIC SAND: PARTÍCULAS DE RESSONÂNCIA NO FUNDO (PERMANENTE)
+    // ========================================================
+    const sandCanvas = document.getElementById('bg-layer-sand');
+    const sCtx = sandCanvas.getContext('2d');
+    let particles = [];
+
+    function resizeSand() {
+      sandCanvas.width = window.innerWidth;
+      sandCanvas.height = window.innerHeight;
+      particles = [];
+      const count = Math.floor(window.innerWidth * 0.08);
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * sandCanvas.width,
+          y: Math.random() * sandCanvas.height,
+          originY: Math.random() * sandCanvas.height,
+          size: Math.random() * 1.4 + 0.6,
+          speed: Math.random() * 0.02 + 0.01,
+          phase: Math.random() * Math.PI * 2,
+          opacity: Math.random() * 0.35 + 0.1
+        });
+      }
+    }
+    window.addEventListener('resize', resizeSand);
+    resizeSand();
+
+    function renderSandParticles(audioEnergy) {
+      sCtx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
+
+      for (let p of particles) {
+        p.phase += p.speed;
+        const wave = Math.sin(p.phase + (p.x * 0.005)) * (15 + audioEnergy * 35);
+        p.y = p.originY + wave;
+
+        sCtx.fillStyle = `rgba(200, 200, 200, ${p.opacity + audioEnergy * 0.2})`;
+        sCtx.beginPath();
+        sCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        sCtx.fill();
+      }
+    }
+
+    // Configuração dos 4 Stems de Áudio
+    const fullAudioFiles = [
+      'audio/gorillaz/song.mp3',   // 0: Vocals
+      'audio/gorillaz/guitar.mp3', // 1: Guitar
+      'audio/gorillaz/rhythm.mp3', // 2: Rhythm
+      'audio/gorillaz/drums.mp3'   // 3: Drums
+    ];
+
+    const sineLayers = [
+      { freq: 2.8, baseColor: [240, 240, 240], interColor: [192, 132, 252], amp: 0.28, speed: 0.042 }, // Vocals
+      { freq: 5.2, baseColor: [56, 189, 248],  interColor: [56, 189, 248],  amp: 0.20, speed: 0.052 }, // Guitar
+      { freq: 1.5, baseColor: [163, 163, 163], interColor: [251, 191, 36],  amp: 0.26, speed: 0.034 }, // Rhythm
+      { freq: 7.0, baseColor: [212, 212, 212], interColor: [244, 63, 94],   amp: 0.15, speed: 0.065 }  // Drums
+    ];
+
+    let audioCtx = null;
+    let masterGainNode = null;
+    let isMasterRunning = false;
+    let audioStartTime = 0;
+    let audioBuffers = [];
+    let sourceNodes = [];
+    let stemGainNodes = [];
+    let analyserNodes = [];
+    let timeDataArrays = [];
+    const stemState = [false, false, false, false];
+
+    // Elementos DOM de Camadas
+    const layerIdle = document.getElementById('layer-idle');
+    const layers = [
+      document.getElementById('layer-0'),
+      document.getElementById('layer-1'),
+      document.getElementById('layer-2'),
+      document.getElementById('layer-3')
+    ];
+    const slots = [
+      document.getElementById('slot-0'),
+      document.getElementById('slot-1'),
+      document.getElementById('slot-2'),
+      document.getElementById('slot-3')
+    ];
+
+    const fadeCuriosity = document.getElementById('fade-curiosity');
+    const fadeLinks = document.getElementById('fade-links');
+    const finalMixerStage = document.getElementById('finalMixerStage');
+
+    const masterVolumeSlider = document.getElementById('masterVolumeSlider');
+    const volumeValueDisplay = document.getElementById('volumeValueDisplay');
+    const interludeBadge = document.getElementById('interludeBadge');
+
+    async function loadBuffers() {
+      if (audioBuffers.length === 4) return;
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!audioCtx) audioCtx = new AudioContext();
+
+      const promises = fullAudioFiles.map(async (url) => {
+        const resp = await fetch(url);
+        const arrayBuf = await resp.arrayBuffer();
+        return await audioCtx.decodeAudioData(arrayBuf);
+      });
+      audioBuffers = await Promise.all(promises);
+    }
+
+    function startEngine() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      if (!masterGainNode) {
+        masterGainNode = audioCtx.createGain();
+        masterGainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        masterGainNode.connect(audioCtx.destination);
+      }
+
+      const now = audioCtx.currentTime;
+      audioStartTime = now;
+
+      sourceNodes.forEach(node => { try { node.stop(); } catch(e){} });
+      sourceNodes = [];
+      stemGainNodes = [];
+      analyserNodes = [];
+      timeDataArrays = [];
+
+      for (let i = 0; i < 4; i++) {
+        const src = audioCtx.createBufferSource();
+        src.buffer = audioBuffers[i];
+        src.loop = true;
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(stemState[i] ? 1.0 : 0.0, now);
+
+        // AnalyserNode real e individual para cada stem
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 512;
+        analyser.smoothingTimeConstant = 0.85;
+
+        src.connect(gain);
+        gain.connect(analyser);
+        analyser.connect(masterGainNode);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        analyserNodes.push(analyser);
+        timeDataArrays.push(dataArray);
+
+        src.start(now + 0.05);
+        sourceNodes.push(src);
+        stemGainNodes.push(gain);
+      }
+
+      isMasterRunning = true;
+    }
+
+    masterVolumeSlider.addEventListener('input', (e) => {
+      const vol = parseFloat(e.target.value) / 100;
+      volumeValueDisplay.innerText = `${Math.round(vol * 100)}%`;
+      if (masterGainNode && audioCtx) {
+        masterGainNode.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.02);
+      }
+    });
+
+    // TRANSIÇÃO CINEMATOGRÁFICA DE TEXTO
+    function transitionStory(fromEl, toEl) {
+      if (fromEl) fromEl.classList.remove('active');
+      setTimeout(() => {
+        if (toEl) toEl.classList.add('active');
+      }, 350);
+    }
+
+    // ETAPA 1: Vocals
+    document.getElementById('btnStep-0').addEventListener('click', async () => {
+      slots[0].classList.remove('active');
+      transitionStory(layerIdle, layers[0]);
+
+      await loadBuffers();
+      stemState[0] = true;
+      startEngine();
+
+      setTimeout(() => {
+        slots[1].classList.add('active');
+      }, 3500);
+    });
+
+    // ETAPA 2: Guitar
+    document.getElementById('btnStep-1').addEventListener('click', () => {
+      slots[1].classList.remove('active');
+      transitionStory(layers[0], layers[1]);
+
+      stemState[1] = true;
+      stemGainNodes[1].gain.setTargetAtTime(1.0, audioCtx.currentTime, 0.06);
+
+      setTimeout(() => {
+        slots[2].classList.add('active');
+      }, 3500);
+    });
+
+    // ETAPA 3: Rhythm
+    document.getElementById('btnStep-2').addEventListener('click', () => {
+      slots[2].classList.remove('active');
+      transitionStory(layers[1], layers[2]);
+
+      stemState[2] = true;
+      stemGainNodes[2].gain.setTargetAtTime(1.0, audioCtx.currentTime, 0.06);
+
+      setTimeout(() => {
+        slots[3].classList.add('active');
+      }, 3500);
+    });
+
+    // ETAPA 4: Drums
+    document.getElementById('btnStep-3').addEventListener('click', () => {
+      slots[3].classList.remove('active');
+      transitionStory(layers[2], layers[3]);
+
+      stemState[3] = true;
+      stemGainNodes[3].gain.setTargetAtTime(1.0, audioCtx.currentTime, 0.06);
+
+      setTimeout(() => {
+        fadeCuriosity.classList.add('revealed');
+      }, 1200);
+
+      setTimeout(() => {
+        fadeLinks.classList.add('revealed');
+      }, 2400);
+
+      setTimeout(() => {
+        finalMixerStage.classList.add('revealed');
+      }, 3600);
+    });
+
+    // Controles do Mixer Final
+    for (let i = 0; i < 4; i++) {
+      const miniBtn = document.getElementById(`miniBtn-${i}`);
+      miniBtn.addEventListener('click', () => {
+        stemState[i] = !stemState[i];
+        stemGainNodes[i].gain.setTargetAtTime(stemState[i] ? 1.0 : 0.0, audioCtx.currentTime, 0.04);
+        miniBtn.classList.toggle('active', stemState[i]);
+      });
+    }
+
+    // CANVAS DO OSCILOSCÓPIO: TRANSIÇÃO FLUIDA DE 1:06 (66s) A 2:35 (155s)
+    const canvas = document.getElementById('scopeCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth * (window.devicePixelRatio || 1);
+      canvas.height = 105 * (window.devicePixelRatio || 1);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let basePhase = 0;
+    let interludeFactor = 0.0;
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const w = canvas.width;
+      const h = canvas.height;
+      const midY = h / 2;
+
+      basePhase += 0.042;
+
+      let activeCount = 0;
+      stemState.forEach(s => { if (s && isMasterRunning) activeCount++; });
+
+      if (activeCount === 0) {
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#141414';
+        ctx.moveTo(0, midY);
+        ctx.lineTo(w, midY);
+        ctx.stroke();
+
+        // Renderiza partículas de areia suaves desde o primeiro instante
+        renderSandParticles(0);
+      } else {
+
+        // JANELA EXATA DO INTERLÚDIO: Inicia aos 1:06 (66.0s) e vai até 2:35 (155.0s)
+        let targetInterlude = 0.0;
+        if (isMasterRunning && audioCtx) {
+          const trackDuration = 222.17;
+          const playbackTime = (audioCtx.currentTime - audioStartTime) % trackDuration;
+          if (playbackTime >= 66.0 && playbackTime <= 155.0) {
+            targetInterlude = 1.0;
+          }
+        }
+
+        interludeFactor += (targetInterlude - interludeFactor) * 0.08;
+
+        if (interludeBadge) {
+          interludeBadge.style.opacity = (interludeFactor > 0.3) ? (interludeFactor * 0.9).toString() : '0';
+        }
+
+        ctx.save();
+        if (interludeFactor > 0.05) {
+          ctx.shadowBlur = interludeFactor * 16;
+        }
+
+        // Cálculo da energia sonora total para as partículas de areia
+        let totalRmsEnergy = 0;
+
+        for (let i = 0; i < 4; i++) {
+          if (stemState[i] && analyserNodes[i]) {
+            const analyser = analyserNodes[i];
+            const data = timeDataArrays[i];
+            analyser.getByteTimeDomainData(data);
+
+            // Calcula RMS real do sinal da faixa
+            let sumSq = 0;
+            for (let k = 0; k < data.length; k++) {
+              const val = (data[k] - 128) / 128;
+              sumSq += val * val;
+            }
+            const rms = Math.sqrt(sumSq / data.length);
+            totalRmsEnergy += rms;
+
+            // Se a faixa estiver em silêncio real (rms < 0.008), desenha apenas uma linha plana tênue
+            const isSilent = rms < 0.008;
+
+            const layer = sineLayers[i];
+            const r = Math.round(layer.baseColor[0] + (layer.interColor[0] - layer.baseColor[0]) * interludeFactor);
+            const g = Math.round(layer.baseColor[1] + (layer.interColor[1] - layer.baseColor[1]) * interludeFactor);
+            const b = Math.round(layer.baseColor[2] + (layer.interColor[2] - layer.baseColor[2]) * interludeFactor);
+            const strokeColor = `rgb(${r}, ${g}, ${b})`;
+
+            ctx.strokeStyle = strokeColor;
+            if (interludeFactor > 0.05 && !isSilent) {
+              ctx.shadowColor = strokeColor;
+            }
+            ctx.lineWidth = isSilent ? 1.0 : (1.4 + interludeFactor * 0.8);
+
+            ctx.beginPath();
+
+            if (isSilent) {
+              // Silêncio: linha reta de repouso tênue
+              ctx.moveTo(0, midY);
+              ctx.lineTo(w, midY);
+            } else {
+              // Áudio ativo: osciloscópio real desenhado a partir da forma de onda do buffer
+              const step = data.length / w;
+              // Escala de amplitude que reage fisicamente ao volume real do áudio
+              const ampScale = Math.min(1.8, Math.max(0.4, rms * 4.5)) * (h * 0.42);
+
+              for (let x = 0; x < w; x++) {
+                const sampleIdx = Math.floor(x * step);
+                const sampleNorm = (data[sampleIdx] - 128) / 128; // -1.0 a +1.0
+                const y = midY + sampleNorm * ampScale;
+
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+              }
+            }
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+
+        // Partículas de areia reagem à energia acústica real medida dos instrumentos
+        renderSandParticles(Math.min(1.0, totalRmsEnergy * 3.5) + interludeFactor * 0.4);
+
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>
