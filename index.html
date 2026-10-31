@@ -349,12 +349,12 @@
           </button>
         </div>
 
-        <!-- Slot 2: Botão Rhythm -->
+        <!-- Slot 2: Botão Bass -->
         <div id="slot-2" class="action-slot">
           <button class="flash-step-btn group" id="btnStep-2">
             <span class="flex items-center gap-3">
               <span class="text-neutral-500 text-[10px] font-mono">03</span>
-              <span class="font-medium text-neutral-100 tracking-tight">Rhythm</span>
+              <span class="font-medium text-neutral-100 tracking-tight">Bass</span>
             </span>
             <span class="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-medium tracking-wide shadow-[0_0_12px_rgba(245,158,11,0.15)] group-hover:border-amber-400 group-hover:bg-amber-500/20 transition-all duration-300">
               <span class="relative flex h-1.5 w-1.5">
@@ -403,7 +403,7 @@
           </button>
           <button id="miniBtn-2" class="mini-stem-btn active p-2.5 rounded-lg border text-center font-mono text-xs" data-idx="2">
             <span class="text-[9px] text-neutral-600 block">03</span>
-            <span>Rhythm</span>
+            <span>Bass</span>
           </button>
           <button id="miniBtn-3" class="mini-stem-btn active p-2.5 rounded-lg border text-center font-mono text-xs" data-idx="3">
             <span class="text-[9px] text-neutral-600 block">04</span>
@@ -460,7 +460,7 @@
         text0: "Tudo começou em 1998 com meu primeiro computador de tubo. Abrir gabinetes, decifrar barramentos e construir hardware do zero moldaram meu instinto para engenharia reversa e arquitetura de sistemas.",
         text1: "Desmontar máquinas na infância me ensinou a não temer a complexidade. Hoje, uno automação e inteligência artificial para o que realmente importa: eliminar atrito operacional, orquestrar dados e fazer a tecnologia trabalhar a favor das pessoas.",
         text2: "Construir soluções sólidas exige raciocinar por primeiros princípios e desafiar premissas básicas. A música me lembra todo dia que a precisão técnica só se sustenta quando todas as partes operam em harmonia.",
-        text3_main: "Lidero o Customer Success para Contas Globais de infraestrutura de telecomunicações e tecnologia B2B, orquestrando SLAs críticos e governança executiva. Além do palco corporativo, a música é o pilar estruturante: mais de 20 anos em cordas, bateria e formação em Composição e Regência na Escola de Música e Belas Artes ao lado da minha esposa.",
+        text3_main: "À frente do Customer Success para Contas Globais de infraestrutura de telecomunicações e tecnologia B2B, orquestro SLAs críticos e governança executiva. Além do palco corporativo, a música é o pilar estruturante: mais de 20 anos em cordas, bateria e formação em Composição e Regência na Escola de Música e Belas Artes ao lado da minha esposa.",
         curiosityBadge: "// RAÍZES & COMPOSIÇÃO",
         text3_secret: "Música é uma disciplina diária que conecta tudo o que construo.",
         invite: "Te convido a conhecer mais:",
@@ -476,7 +476,7 @@
         text0: "Todo comenzó en 1998 con mi primera computadora con monitor CRT. Abrir gabinetes, descifrar buses de datos y construir hardware desde cero moldearon mi instinto para la ingeniería inversa y la arquitectura de sistemas.",
         text1: "Desmontar máquinas en mi infancia me enseñó a no temerle a la complejidad. Hoy, uno la automatización y la inteligencia artificial para lo que realmente importa: eliminar la fricción operativa, orquestar datos y hacer que la tecnología trabaje a favor de las personas.",
         text2: "Construir soluciones sólidas exige razonar por primeros principios y desafiar premisas básicas. La música me recuerda todos los días que la precisión técnica solo se sostiene cuando todas las partes operan en armonía.",
-        text3_main: "Lidero el Customer Success para Cuentas Globales de infraestructura de telecomunicaciones y tecnología B2B, orquestando SLAs críticos y gobernanza ejecutiva. Más allá del escenario corporativo, la música es el pilar fundamental: más de 20 años en cuerdas, batería y formación en Composición y Dirección en la Escuela de Música y Bellas Artes junto a mi esposa.",
+        text3_main: "Al frente de Customer Success para Cuentas Globales de infraestructura de telecomunicaciones y tecnología B2B, orquestando SLAs críticos y gobernanza ejecutiva. Más allá del escenario corporativo, la música es el pilar fundamental: más de 20 años en cuerdas, batería y formación en Composición y Dirección en la Escuela de Música y Bellas Artes junto a mi esposa.",
         curiosityBadge: "// RAÍCES Y COMPOSICIÓN",
         text3_secret: "La música es una disciplina diaria que conecta todo lo que construyo.",
         invite: "Te invito a conectar:",
@@ -575,14 +575,14 @@
     const fullAudioFiles = [
       'audio/gorillaz/song.mp3',   // 0: Vocals
       'audio/gorillaz/guitar.mp3', // 1: Guitar
-      'audio/gorillaz/rhythm.mp3', // 2: Rhythm
+      'audio/gorillaz/rhythm.mp3', // 2: Bass
       'audio/gorillaz/drums.mp3'   // 3: Drums
     ];
 
     const sineLayers = [
       { freq: 2.8, baseColor: [240, 240, 240], interColor: [192, 132, 252], amp: 0.28, speed: 0.042 }, // Vocals
       { freq: 5.2, baseColor: [56, 189, 248],  interColor: [56, 189, 248],  amp: 0.20, speed: 0.052 }, // Guitar
-      { freq: 1.5, baseColor: [163, 163, 163], interColor: [251, 191, 36],  amp: 0.26, speed: 0.034 }, // Rhythm
+      { freq: 1.5, baseColor: [163, 163, 163], interColor: [251, 191, 36],  amp: 0.26, speed: 0.034 }, // Bass
       { freq: 7.0, baseColor: [212, 212, 212], interColor: [244, 63, 94],   amp: 0.15, speed: 0.065 }  // Drums
     ];
 
@@ -724,7 +724,7 @@
       }, 3500);
     });
 
-    // ETAPA 3: Rhythm
+    // ETAPA 3: Bass
     document.getElementById('btnStep-2').addEventListener('click', () => {
       slots[2].classList.remove('active');
       transitionStory(layers[1], layers[2]);
